@@ -1,6 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, Wallet, DollarSign } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { TrendingUp, TrendingDown } from "lucide-react";
 import { PortfolioSummary } from "@/types/portfolio";
+import { motion } from "framer-motion";
 
 interface PortfolioSummaryCardsProps {
   summary: PortfolioSummary;
@@ -17,63 +18,86 @@ export const PortfolioSummaryCards = ({ summary }: PortfolioSummaryCardsProps) =
     }).format(value);
   };
 
+  const cards = [
+    {
+      label: "Total Investment",
+      value: formatCurrency(summary.totalInvestment),
+      subtitle: "Initial capital",
+      delay: 0.1,
+    },
+    {
+      label: "Present Value",
+      value: formatCurrency(summary.totalPresentValue),
+      subtitle: "Current portfolio",
+      delay: 0.2,
+    },
+    {
+      label: "Total Gain/Loss",
+      value: formatCurrency(summary.totalGainLoss),
+      subtitle: "Absolute change",
+      isColored: true,
+      delay: 0.3,
+    },
+    {
+      label: "Return",
+      value: `${isProfit ? "+" : ""}${summary.gainLossPercentage.toFixed(2)}%`,
+      subtitle: "Percentage return",
+      isColored: true,
+      delay: 0.4,
+    },
+  ];
+
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-      <Card className="border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Investment</CardTitle>
-          <Wallet className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(summary.totalInvestment)}</div>
-          <p className="text-xs text-muted-foreground mt-1">Initial capital invested</p>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Present Value</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(summary.totalPresentValue)}</div>
-          <p className="text-xs text-muted-foreground mt-1">Current portfolio value</p>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Gain/Loss</CardTitle>
-          {isProfit ? (
-            <TrendingUp className="h-4 w-4 text-success" />
-          ) : (
-            <TrendingDown className="h-4 w-4 text-destructive" />
-          )}
-        </CardHeader>
-        <CardContent>
-          <div className={`text-2xl font-bold ${isProfit ? "text-success" : "text-destructive"}`}>
-            {formatCurrency(summary.totalGainLoss)}
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">Absolute change</p>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Return (%)</CardTitle>
-          {isProfit ? (
-            <TrendingUp className="h-4 w-4 text-success" />
-          ) : (
-            <TrendingDown className="h-4 w-4 text-destructive" />
-          )}
-        </CardHeader>
-        <CardContent>
-          <div className={`text-2xl font-bold ${isProfit ? "text-success" : "text-destructive"}`}>
-            {isProfit ? "+" : ""}{summary.gainLossPercentage.toFixed(2)}%
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">Percentage return</p>
-        </CardContent>
-      </Card>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+      {cards.map((card, index) => (
+        <motion.div
+          key={card.label}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: card.delay }}
+          whileHover={{ y: -4 }}
+        >
+          <Card className="border-border hover:border-primary/20 transition-colors overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="text-xs font-light text-muted-foreground uppercase tracking-wider">
+                  {card.label}
+                </div>
+                {card.isColored && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: card.delay + 0.2, type: "spring" }}
+                  >
+                    {isProfit ? (
+                      <TrendingUp className="h-4 w-4 text-success" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4 text-destructive" />
+                    )}
+                  </motion.div>
+                )}
+              </div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: card.delay + 0.1 }}
+                className={`text-3xl font-light mb-1 ${
+                  card.isColored
+                    ? isProfit
+                      ? "text-success"
+                      : "text-destructive"
+                    : "text-foreground"
+                }`}
+              >
+                {card.value}
+              </motion.div>
+              <div className="text-xs text-muted-foreground font-light">
+                {card.subtitle}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
     </div>
   );
 };

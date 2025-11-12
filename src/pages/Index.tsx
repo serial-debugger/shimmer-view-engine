@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
+import { PortfolioHeader } from "@/components/PortfolioHeader";
 import { PortfolioSummaryCards } from "@/components/PortfolioSummaryCards";
 import { SectorGroup } from "@/components/SectorGroup";
 import { mockStocks } from "@/data/mockPortfolio";
 import { SectorSummary, PortfolioSummary } from "@/types/portfolio";
-import { RefreshCw } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Index = () => {
   const [lastUpdate, setLastUpdate] = useState(new Date());
@@ -68,50 +69,37 @@ const Index = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-4xl font-bold text-foreground">Portfolio Dashboard</h1>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-              <span>Last updated: {formatTime(lastUpdate)}</span>
-            </div>
-          </div>
-          <p className="text-muted-foreground">
-            Real-time portfolio tracking with live market data
-          </p>
-        </div>
+      <div className="container mx-auto py-8 px-4 max-w-7xl">
+        <PortfolioHeader lastUpdate={lastUpdate} isRefreshing={isRefreshing} />
 
-        {/* Summary Cards */}
         <PortfolioSummaryCards summary={portfolioSummary} />
 
-        {/* Sector Groups */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4 text-foreground">Holdings by Sector</h2>
-          {sectorSummaries.map((sectorSummary) => (
-            <SectorGroup key={sectorSummary.sector} sectorSummary={sectorSummary} />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <h2 className="text-2xl font-light tracking-wide mb-6 text-foreground">
+            Holdings by Sector
+          </h2>
+          {sectorSummaries.map((sectorSummary, index) => (
+            <SectorGroup key={sectorSummary.sector} sectorSummary={sectorSummary} index={index} />
           ))}
-        </div>
+        </motion.div>
 
-        {/* Footer Note */}
-        <div className="mt-8 p-4 rounded-lg bg-secondary border border-border">
-          <p className="text-sm text-muted-foreground">
-            <strong>Note:</strong> Market data updates automatically every 15 seconds. 
-            Current Market Price (CMP) is fetched from Yahoo Finance. 
-            P/E Ratio and Latest Earnings are fetched from Google Finance.
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1 }}
+          className="mt-8 p-6 rounded-xl bg-secondary/30 border border-border"
+        >
+          <p className="text-sm text-muted-foreground font-light leading-relaxed">
+            <span className="font-normal text-foreground">Market Data:</span> Updates automatically every 15 seconds. 
+            CMP from Yahoo Finance • P/E Ratio and Earnings from Google Finance
           </p>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
