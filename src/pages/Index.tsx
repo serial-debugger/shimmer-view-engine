@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { PortfolioHeader } from "@/components/PortfolioHeader";
 import { PortfolioSummaryCards } from "@/components/PortfolioSummaryCards";
 import { SectorGroup } from "@/components/SectorGroup";
+import { StockPriceChart } from "@/components/StockPriceChart";
 import { mockStocks } from "@/data/mockPortfolio";
+import { mockStockHistories } from "@/data/mockStockHistory";
 import { SectorSummary, PortfolioSummary } from "@/types/portfolio";
 import { motion } from "framer-motion";
 
@@ -76,10 +78,44 @@ const Index = () => {
 
         <PortfolioSummaryCards summary={portfolioSummary} />
 
+        {/* Stock Price Charts Section */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
+          className="mb-8"
+        >
+          <h2 className="text-2xl font-light tracking-wide mb-6 text-foreground">
+            Price History
+          </h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 mb-8">
+            <StockPriceChart
+              title="Infosys Ltd"
+              data={mockStockHistories["Infosys Ltd"]}
+              delay={0.6}
+            />
+            <StockPriceChart
+              title="TCS Ltd"
+              data={mockStockHistories["TCS Ltd"]}
+              delay={0.7}
+            />
+            <StockPriceChart
+              title="HDFC Bank Ltd"
+              data={mockStockHistories["HDFC Bank Ltd"]}
+              delay={0.8}
+            />
+            <StockPriceChart
+              title="Reliance Industries"
+              data={mockStockHistories["Reliance Industries"]}
+              delay={0.9}
+            />
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 1 }}
         >
           <h2 className="text-2xl font-light tracking-wide mb-6 text-foreground">
             Holdings by Sector
@@ -92,7 +128,7 @@ const Index = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 1 }}
+          transition={{ duration: 0.5, delay: 1.5 }}
           className="mt-8 p-6 rounded-xl bg-secondary/30 border border-border"
         >
           <p className="text-sm text-muted-foreground font-light leading-relaxed">
