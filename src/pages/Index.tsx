@@ -3,6 +3,7 @@ import { PortfolioHeader } from "@/components/PortfolioHeader";
 import { PortfolioSummaryCards } from "@/components/PortfolioSummaryCards";
 import { SectorGroup } from "@/components/SectorGroup";
 import { StockPriceChart } from "@/components/StockPriceChart";
+import { StockComparisonChart } from "@/components/StockComparisonChart";
 import { mockStocks } from "@/data/mockPortfolio";
 import { mockStockHistories } from "@/data/mockStockHistory";
 import { SectorSummary, PortfolioSummary } from "@/types/portfolio";
@@ -77,6 +78,19 @@ const Index = () => {
         <PortfolioHeader lastUpdate={lastUpdate} isRefreshing={isRefreshing} />
 
         <PortfolioSummaryCards summary={portfolioSummary} />
+
+        {/* Stock Comparison Section */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mb-8"
+        >
+          <h2 className="text-2xl font-light tracking-wide mb-6 text-foreground">
+            Compare Performance
+          </h2>
+          <StockComparisonChart />
+        </motion.div>
 
         {/* Stock Price Charts Section */}
         <motion.div
