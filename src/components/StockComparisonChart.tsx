@@ -60,6 +60,17 @@ export const StockComparisonChart = () => {
 
   const data = normalizeData();
 
+  // Calculate total change for each stock over the period
+  const getStockChange = (stock: string) => {
+    const days = TIME_RANGE_DAYS[timeRange];
+    const stockData = mockStockHistories[stock as keyof typeof mockStockHistories].slice(-days);
+    if (stockData.length === 0) return 0;
+    
+    const startPrice = stockData[0].price;
+    const endPrice = stockData[stockData.length - 1].price;
+    return ((endPrice - startPrice) / startPrice) * 100;
+  };
+
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -101,33 +112,48 @@ export const StockComparisonChart = () => {
                 </p>
               </div>
               <div className="flex flex-wrap gap-4">
-                {Object.keys(mockStockHistories).map((stock) => (
-                  <motion.div
-                    key={stock}
-                    className="flex items-center gap-2"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Checkbox
-                      id={stock}
-                      checked={selectedStocks.includes(stock)}
-                      onCheckedChange={() => toggleStock(stock)}
-                      className="border-border"
-                    />
-                    <Label
-                      htmlFor={stock}
-                      className="text-sm font-light cursor-pointer flex items-center gap-2"
+                {Object.keys(mockStockHistories).map((stock) => {
+                  const change = getStockChange(stock);
+                  const isPositive = change >= 0;
+                  
+                  return (
+                    <motion.div
+                      key={stock}
+                      className="flex items-center gap-2"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{
-                          backgroundColor: STOCK_COLORS[stock as keyof typeof STOCK_COLORS],
-                        }}
+                      <Checkbox
+                        id={stock}
+                        checked={selectedStocks.includes(stock)}
+                        onCheckedChange={() => toggleStock(stock)}
+                        className="border-border"
                       />
-                      {stock}
-                    </Label>
-                  </motion.div>
-                ))}
+                      <Label
+                        htmlFor={stock}
+                        className="text-sm font-light cursor-pointer flex items-center gap-2"
+                      >
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{
+                            backgroundColor: STOCK_COLORS[stock as keyof typeof STOCK_COLORS],
+                          }}
+                        />
+                        <span>{stock}</span>
+                        {selectedStocks.includes(stock) && (
+                          <span
+                            className={`text-xs font-semibold ${
+                              isPositive ? "text-success" : "text-destructive"
+                            }`}
+                          >
+                            {isPositive ? "+" : ""}
+                            {change.toFixed(2)}%
+                          </span>
+                        )}
+                      </Label>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
             <ToggleGroup
