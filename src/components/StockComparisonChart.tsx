@@ -2,9 +2,21 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
 import { mockStockHistories } from "@/data/mockStockHistory";
+
+type TimeRange = "1W" | "1M" | "6M" | "1Y" | "3Y" | "5Y";
+
+const TIME_RANGE_DAYS: Record<TimeRange, number> = {
+  "1W": 7,
+  "1M": 30,
+  "6M": 180,
+  "1Y": 365,
+  "3Y": 1095,
+  "5Y": 1825,
+};
 
 const STOCK_COLORS = {
   "Infosys Ltd": "hsl(var(--chart-1))",
@@ -15,6 +27,7 @@ const STOCK_COLORS = {
 
 export const StockComparisonChart = () => {
   const [selectedStocks, setSelectedStocks] = useState<string[]>(["Infosys Ltd", "TCS Ltd"]);
+  const [timeRange, setTimeRange] = useState<TimeRange>("1M");
 
   const toggleStock = (stock: string) => {
     setSelectedStocks((prev) =>
@@ -26,15 +39,15 @@ export const StockComparisonChart = () => {
   const normalizeData = () => {
     if (selectedStocks.length === 0) return [];
 
-    const allDates = mockStockHistories[selectedStocks[0] as keyof typeof mockStockHistories].map(
-      (d) => d.date
-    );
+    const days = TIME_RANGE_DAYS[timeRange];
+    const allData = mockStockHistories[selectedStocks[0] as keyof typeof mockStockHistories];
+    const filteredData = allData.slice(-days);
 
-    return allDates.map((date, index) => {
-      const dataPoint: any = { date };
+    return filteredData.map((item, index) => {
+      const dataPoint: any = { date: item.date };
 
       selectedStocks.forEach((stock) => {
-        const stockData = mockStockHistories[stock as keyof typeof mockStockHistories];
+        const stockData = mockStockHistories[stock as keyof typeof mockStockHistories].slice(-days);
         const startPrice = stockData[0].price;
         const currentPrice = stockData[index].price;
         const percentChange = ((currentPrice - startPrice) / startPrice) * 100;
@@ -77,44 +90,71 @@ export const StockComparisonChart = () => {
     >
       <Card className="border-border hover:border-primary/20 transition-colors">
         <CardHeader className="pb-4">
-          <div className="flex items-start justify-between flex-wrap gap-4">
-            <div>
-              <h3 className="text-lg font-light tracking-wide text-foreground mb-1">
-                Stock Comparison
-              </h3>
-              <p className="text-xs text-muted-foreground font-light">
-                Percentage change from start (Last 30 days)
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-4">
-              {Object.keys(mockStockHistories).map((stock) => (
-                <motion.div
-                  key={stock}
-                  className="flex items-center gap-2"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Checkbox
-                    id={stock}
-                    checked={selectedStocks.includes(stock)}
-                    onCheckedChange={() => toggleStock(stock)}
-                    className="border-border"
-                  />
-                  <Label
-                    htmlFor={stock}
-                    className="text-sm font-light cursor-pointer flex items-center gap-2"
+          <div className="flex flex-col gap-4">
+            <div className="flex items-start justify-between flex-wrap gap-4">
+              <div>
+                <h3 className="text-lg font-light tracking-wide text-foreground mb-1">
+                  Stock Comparison
+                </h3>
+                <p className="text-xs text-muted-foreground font-light">
+                  Percentage change from start
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                {Object.keys(mockStockHistories).map((stock) => (
+                  <motion.div
+                    key={stock}
+                    className="flex items-center gap-2"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{
-                        backgroundColor: STOCK_COLORS[stock as keyof typeof STOCK_COLORS],
-                      }}
+                    <Checkbox
+                      id={stock}
+                      checked={selectedStocks.includes(stock)}
+                      onCheckedChange={() => toggleStock(stock)}
+                      className="border-border"
                     />
-                    {stock}
-                  </Label>
-                </motion.div>
-              ))}
+                    <Label
+                      htmlFor={stock}
+                      className="text-sm font-light cursor-pointer flex items-center gap-2"
+                    >
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{
+                          backgroundColor: STOCK_COLORS[stock as keyof typeof STOCK_COLORS],
+                        }}
+                      />
+                      {stock}
+                    </Label>
+                  </motion.div>
+                ))}
+              </div>
             </div>
+            <ToggleGroup
+              type="single"
+              value={timeRange}
+              onValueChange={(value) => value && setTimeRange(value as TimeRange)}
+              className="justify-start"
+            >
+              <ToggleGroupItem value="1W" aria-label="1 Week" className="text-xs px-3">
+                1W
+              </ToggleGroupItem>
+              <ToggleGroupItem value="1M" aria-label="1 Month" className="text-xs px-3">
+                1M
+              </ToggleGroupItem>
+              <ToggleGroupItem value="6M" aria-label="6 Months" className="text-xs px-3">
+                6M
+              </ToggleGroupItem>
+              <ToggleGroupItem value="1Y" aria-label="1 Year" className="text-xs px-3">
+                1Y
+              </ToggleGroupItem>
+              <ToggleGroupItem value="3Y" aria-label="3 Years" className="text-xs px-3">
+                3Y
+              </ToggleGroupItem>
+              <ToggleGroupItem value="5Y" aria-label="5 Years" className="text-xs px-3">
+                5Y
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
         </CardHeader>
         <CardContent className="p-0 pb-4">

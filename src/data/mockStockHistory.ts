@@ -4,16 +4,17 @@ export interface StockHistoryData {
   volume: number;
 }
 
-// Generate mock historical data for the last 30 days
+// Generate mock historical data for specified number of days
 const generateMockHistory = (
   startPrice: number,
+  days: number = 30,
   volatility: number = 0.02
 ): StockHistoryData[] => {
   const data: StockHistoryData[] = [];
   const today = new Date();
   let currentPrice = startPrice;
 
-  for (let i = 29; i >= 0; i--) {
+  for (let i = days - 1; i >= 0; i--) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
 
@@ -31,12 +32,13 @@ const generateMockHistory = (
   return data;
 };
 
+// Generate extended historical data (5 years)
 export const mockStockHistories = {
-  "Infosys Ltd": generateMockHistory(1450, 0.025),
-  "TCS Ltd": generateMockHistory(3250, 0.02),
-  "HDFC Bank Ltd": generateMockHistory(1625, 0.018),
-  "Reliance Industries": generateMockHistory(2450, 0.03),
+  "Infosys Ltd": generateMockHistory(1450, 1825, 0.025),
+  "TCS Ltd": generateMockHistory(3250, 1825, 0.02),
+  "HDFC Bank Ltd": generateMockHistory(1625, 1825, 0.018),
+  "Reliance Industries": generateMockHistory(2450, 1825, 0.03),
 };
 
 // Portfolio overall history (weighted average)
-export const portfolioHistory = generateMockHistory(500000, 0.015);
+export const portfolioHistory = generateMockHistory(500000, 1825, 0.015);
